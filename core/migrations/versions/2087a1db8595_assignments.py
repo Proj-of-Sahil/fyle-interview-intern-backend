@@ -96,6 +96,13 @@ def upgrade():
         teacher_id=teacher_2.id,
         auth_principal=AuthPrincipal(user_id=student_2.user_id, student_id=student_2.id)
     )
+    
+
+    Assignment.mark_grade_by_teacher(
+        _id=assignment_3.id,
+        grade='A',
+        auth_principal=AuthPrincipal(user_id=teacher_2.user_id, teacher_id=teacher_2.id)
+    )
 
     db.session.commit()
     # ### end Alembic commands ###
