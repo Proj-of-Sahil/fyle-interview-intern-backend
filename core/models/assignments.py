@@ -4,6 +4,7 @@ from core.apis.decorators import AuthPrincipal
 from core.libs import helpers, assertions
 from core.models.teachers import Teacher
 from core.models.students import Student
+from core.models.principals import Principal
 from sqlalchemy.types import Enum as BaseEnum
 
 
@@ -91,3 +92,17 @@ class Assignment(db.Model):
     @classmethod
     def get_assignments_by_teacher(cls):
         return cls.query.all()
+    
+    @classmethod
+    def mark_grade_by_principal(cls, _id, grade, auth_principal: AuthPrincipal):
+        assertions.assert_valid(auth_principal.principal_id == Principal.query.first().id, 'Auth Failed only principal can grade an assignment')
+        assignment = Assignment.get_by_id(_id)
+        assertions.assert_found(assignment, 'No assignment with this id was found')
+        assertions.assert_valid(grade is not None, 'Assignment with empty grade cannot be graded')
+        assertions.assert_valid(assignment.state in [AssignmentStateEnum.SUBMITTED, AssignmentStateEnum.GRADED], 'only a submitted assignment can be graded')
+        assignment.grade = grade
+        assignment.state = AssignmentStateEnum.GRADED
+        db.session.flush()
+
+        return assignment
+    
